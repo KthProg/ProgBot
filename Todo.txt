@@ -1,0 +1,1 @@
+I'm going to make a subclass of TCPClient called IRCBot that will contain the individual commands. This way I can extend the TCPClient class for use with all sorts of protocols.
