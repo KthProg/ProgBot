@@ -1,14 +1,8 @@
-//Mostly created using WinSock examples from msdn
-
 #include "TCPClient.h"
 
 TCPClient::TCPClient(string port, string host)
 {
 	TCPConnect(port, host);
-}
-
-TCPClient::TCPClient()
-{
 }
 
 TCPClient::~TCPClient()
@@ -75,6 +69,9 @@ void TCPClient::TCPConnect(string port, string host)
 		TCPSock = INVALID_SOCKET;
 	}
 
+	// Should really try the next address returned by getaddrinfo
+	// if the connect call failed
+
 	freeaddrinfo(result);
 
 	if (TCPSock == INVALID_SOCKET) {
@@ -88,38 +85,6 @@ void TCPClient::TCPDisconnect()
 {
 	closesocket(TCPSock);
 	WSACleanup();
-}
-void TCPClient::doCmd()
-{
-	//this->fm[userIn.uTxt.cmd];
-	if(userIn.uTxt.cmd == "pong")
-	{
-		pong();
-	}
-	else
-	if(userIn.uTxt.cmd == "say")
-	{
-		say();
-	}
-}
-
-void TCPClient::getInput(string cmd)
-{
-	try
-	{
-		cmd = cmd.substr(1, string::npos);
-		userIn.nick = cmd.substr(0, cmd.find('!',0));
-		cmd = cmd.substr(cmd.find('!',0) + 1,string::npos);
-		userIn.room = cmd.substr(cmd.find('#',0), cmd.find(':',0) - cmd.find('#',0));
-		cmd = cmd.substr(cmd.find(':',0) + 1,string::npos);
-		userIn.uTxt.cmd = cmd.substr(cmd.find('!',0) + 2, cmd.find(' ',cmd.find('!',0) + 2) - (cmd.find('!',0) + 2));
-		cmd = cmd.substr(cmd.find(' ',cmd.find('!',0) + 2) + 1, string::npos);
-		userIn.uTxt.input = cmd;
-	}
-	catch(exception e)
-	{
-		cout << "Exception while parsing user input: " << e.what() << endl;
-	}
 }
 
 string TCPClient::readSocket()
@@ -150,39 +115,6 @@ string TCPClient::readSocket()
 	} while (res == BUFF_SIZE);
 
 	cout << result;
-	if(result.substr(0,4) != "PING")
-	{
-		if(result.find('!',0) != string::npos)
-		{
-			getInput(result);
-		}
-	}
-	else
-	{
-		userIn.uTxt.cmd = "pong";
-		userIn.uTxt.input = result.substr(result.find(':',0) + 1,string::npos);
-	}
-	doCmd();
 
 	return result;
 }
-
-/*void TCPClient::makeMap()
-{
-	fm["say"] = &TCPClient::say;
-	fm["pong"] = &TCPClient::pong;
-}*/
-
-void TCPClient::pong()
-{
-	writeSocket("PONG :" + userIn.uTxt.input + "\n");
-	writeSocket("JOIN #coffeesh0p\n");
-}
-
-void TCPClient::say()
-{
-	writeSocket("PRIVMSG " + userIn.room + ":" + userIn.uTxt.input + "\n");
-}
-
-string TCPClient::login = "NICK ProgBot\nUSER  ProgBot 8 *  : Prog Bot\n";
-string TCPClient::prefix = "!P";
