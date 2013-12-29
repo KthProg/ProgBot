@@ -1,0 +1,1 @@
+Add a privMsg() function to ProgBot.h/ProgBotc.cpp.
