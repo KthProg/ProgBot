@@ -7,27 +7,28 @@
 #include <stdio.h>
 #include <iostream>
 #include <map>
+#include <exception>
 
-#pragma comment(lib, "Ws2_32.lib")
+//#pragma comment(lib, "Ws2_32.lib")
 
 using namespace std;
 
-
-
 class TCPClient
 {
-protected:
+public:
+	string info; // basically the buffer
 	SOCKET TCPSock;
 	map <string, string> input;
-public:
+
 	TCPClient(string port, string host);
 	~TCPClient();
-	string readSocket();
+	void readSocket();
 	void writeSocket(string write);
 	void TCPConnect(string port, string host);
 	void TCPDisconnect();
-	virtual void doCmd();
-	virtual void parseInput(string cmd);
+	virtual void doCmd() = 0;
+	virtual void parseInput() = 0;
+	friend ostream& operator<<(ostream& os, TCPClient& tcp);
 };
 
 #endif
