@@ -1,5 +1,11 @@
 #include "TCPClient.h"
 
+ostream& operator<<(ostream& os, TCPClient& tcp)
+{
+	os << tcp.info;
+	return os;
+}
+
 TCPClient::TCPClient(string port, string host)
 {
 	TCPConnect(port, host);
@@ -9,16 +15,60 @@ TCPClient::~TCPClient()
 {
 	TCPDisconnect();
 }
+
+void TCPClient::readSocket()
+{
+	info = "";
+	try
+	{
+		const int BUFF_SIZE = 512;
+
+		char recvbuf[BUFF_SIZE];
+		int res;
+		// Receive data until all current data is recieved (buffer is not full)
+		do {
+			res = recv(TCPSock, recvbuf, BUFF_SIZE, 0);
+			if (res > 0)
+			{
+				for(int i = 0; i<res; ++i)
+				{
+					info += recvbuf[i];
+				}
+			}
+			else if (res == 0)
+			{
+				cout << "Connection closed" << endl;
+			}
+			else
+			{
+				cout << "Receive failed: " << WSAGetLastError() << endl;
+			}
+		} while (res == BUFF_SIZE);
+
+	}
+	catch(exception e)
+	{
+		cout << "Read Error: " << e.what() << endl;
+	}
+}
+
 void TCPClient::writeSocket(string writeStr)
 {
-	int res = send(TCPSock, writeStr.c_str(), writeStr.length(), 0);
+	try
+	{
+		int res = send(TCPSock, writeStr.c_str(), writeStr.length(), 0);
 
-	if (res == SOCKET_ERROR) {
-		cout << "Write failed: " << WSAGetLastError() << endl;
-		TCPDisconnect();
+		if (res == SOCKET_ERROR) {
+			std::cout << "Write failed: " << WSAGetLastError() << endl;
+			TCPDisconnect();
+		}
+
+		std::cout << writeStr;
 	}
-
-	cout << writeStr;
+	catch(exception e)
+	{
+		cout << "Write Error: " << e.what() << endl;
+	}
 }
 void TCPClient::TCPConnect(string port, string host)
 {
@@ -78,43 +128,9 @@ void TCPClient::TCPConnect(string port, string host)
 		cout << "Unable to connect to server!" << endl;
 		WSACleanup();
 	}
-
-
 }
 void TCPClient::TCPDisconnect()
 {
 	closesocket(TCPSock);
 	WSACleanup();
-}
-
-string TCPClient::readSocket()
-{
-	const int BUFF_SIZE = 512;
-
-	string result;
-	char recvbuf[BUFF_SIZE];
-	int res;
-	// Receive data until all current data is recieved (buffer is not full)
-	do {
-		res = recv(TCPSock, recvbuf, BUFF_SIZE, 0);
-		if (res > 0)
-		{
-			for(int i = 0; i<res; ++i)
-			{
-				result += recvbuf[i];
-			}
-		}
-		else if (res == 0)
-		{
-			cout << "Connection closed" << endl;
-		}
-		else
-		{
-			cout << "Receive failed: " << WSAGetLastError() << endl;
-		}
-	} while (res == BUFF_SIZE);
-
-	cout << result;
-
-	return result;
 }
