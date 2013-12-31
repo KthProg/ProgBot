@@ -5,16 +5,17 @@
 #include <array>
 #include <random>
 #include <time.h>
+#include "TicTacToe.h"
+#include <sstream>
 
 class ProgBot : public IRCBot
 {
 public:
 	ProgBot(string port, string host):IRCBot(port, host)
 	{
-		board.fill('e'); 
 		gInt = 0;
 		prefix = "P! ";
-		login = "NICK ProgBot\nUSER  ProgBot 8 *  : Prog Bot\r\n";
+		login = "NICK Progger\nUSER  Progger 8 *  : Progger\r\n";
 
 		split.push_back(":");	split.push_back("!");
 		split.push_back("#");	split.push_back(":");
@@ -32,7 +33,8 @@ public:
 
 	void say();
 	void ttt(); //tic tac toe
-	array<char, 9> board;
+	TicTacToe tic;
+
 	void gNum(); //guess a number
 	int gInt;
 };
